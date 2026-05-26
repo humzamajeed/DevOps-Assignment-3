@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   mysql:
@@ -35,7 +34,7 @@ services:
     build: ./nginx
     ports:
       - "80:80"
-     depends_on:
+    depends_on:
       - flask-api
     networks:
       - app-network
