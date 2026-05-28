@@ -29,24 +29,24 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        # This step is skipped if secrets are not set, preventing failure
-        if: secrets.DOCKERHUB_USERNAME != ''
+        # Use vars instead of secrets for username if you stored it in Variables
+        if: vars.DOCKERHUB_USERNAME != '' || secrets.DOCKERHUB_USERNAME != ''
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ vars.DOCKERHUB_USERNAME || secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Flask API
         uses: docker/build-push-action@v5
         with:
           context: ./app/flask-api
-          # Only pushes if credentials exist; otherwise, it just builds to test
-          push: ${{ secrets.DOCKERHUB_USERNAME != '' }}
-          tags: ${{ secrets.DOCKERHUB_USERNAME || github.repository_owner }}/flask-api:latest
+          # Push if we have a token
+          push: ${{ secrets.DOCKERHUB_TOKEN != '' }}
+          tags: ${{ vars.DOCKERHUB_USERNAME || secrets.DOCKERHUB_USERNAME || github.repository_owner }}/flask-api:latest
 
       - name: Build and push Nginx
         uses: docker/build-push-action@v5
         with:
           context: ./app/nginx
-          push: ${{ secrets.DOCKERHUB_USERNAME != '' }}
-          tags: ${{ secrets.DOCKERHUB_USERNAME || github.repository_owner }}/nginx-proxy:latest
+          push: ${{ secrets.DOCKERHUB_TOKEN != '' }}
+          tags: ${{ vars.DOCKERHUB_USERNAME || secrets.DOCKERHUB_USERNAME || github.repository_owner }}/nginx-proxy:latest
